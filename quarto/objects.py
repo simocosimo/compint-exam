@@ -330,7 +330,7 @@ class MCTSNode(object):
 class MCTSAgent(Player):
     """MonteCarlo Agent"""
 
-    def __init__(self, quarto: Quarto, num_rounds: int = 1000, c: float = 1.0):
+    def __init__(self, quarto: Quarto, num_rounds: int = 1000, c: float = 10.0):
         super().__init__(quarto)
         # This is a number used to limit the MC tree search
         self._num_rounds = num_rounds

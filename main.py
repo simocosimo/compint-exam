@@ -9,7 +9,7 @@ import random
 class RandomPlayer(quarto.Player):
     """Random player"""
 
-    def __init__(self, quarto: quarto.Quarto) -> None:
+    def __init__(self, quarto: quarto.CustomQuarto) -> None:
         super().__init__(quarto)
 
     def choose_piece(self) -> int:
@@ -19,20 +19,21 @@ class RandomPlayer(quarto.Player):
         return random.randint(0, 3), random.randint(0, 3)
 
 def main():
-    game = quarto.Quarto()
+    game = quarto.CustomQuarto()
     game.set_players((RandomPlayer(game), quarto.MCTSAgent(game, num_rounds=1000, c=10.0)))
     winner = game.run()
     logging.warning(f"main: Winner: player {winner}")
 
+#TODO CHECK IF CUSTOM CLASS IS WORKING IF STARTING AS FIRST PLAYER
 def games_test(games: int = 100):
     wincount = 0
     drawcount = 0
     losecount = 0
     for g in range(games):
         print(f"Playing game number {g}... ", end='')
-        game = quarto.Quarto()
+        game = quarto.CustomQuarto()
         game.set_players((RandomPlayer(game), quarto.MCTSAgent(game, num_rounds=1000, c=10.0)))
-        winner = game.run(printing=False)
+        winner = game.run()
         if winner == 1: wincount += 1
         if winner == 0: losecount += 1
         if winner == -1: drawcount += 1

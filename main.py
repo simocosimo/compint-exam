@@ -24,7 +24,6 @@ def main():
     winner = game.run()
     logging.warning(f"main: Winner: player {winner}")
 
-#TODO CHECK IF CUSTOM CLASS IS WORKING IF STARTING AS FIRST PLAYER
 def games_test(games: int = 100):
     wincount = 0
     drawcount = 0

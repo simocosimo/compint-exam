@@ -338,7 +338,10 @@ class MCTSAgent(Player):
         self._picked_move = None
 
     def choose_piece(self) -> int:
-        ret = copy.deepcopy(self._picked_move._next_piece)
+        # If playing as player 0 I decide the first piece and it will be always piece 0 
+        # (no metter on the choice when choosing first piece)
+        # If playing as player 1 the field will not be None because after moving I select the next piece
+        ret = copy.deepcopy(self._picked_move._next_piece) if self._picked_move is not None else 0
         return ret
 
     def place_piece(self) -> tuple[int, int]:

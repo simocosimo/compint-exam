@@ -28,16 +28,24 @@ def games_test(games: int = 100):
     wincount = 0
     drawcount = 0
     losecount = 0
+    as_player_one = 0
     for g in range(games):
-        print(f"Playing game number {g}... ", end='')
         game = quarto.CustomQuarto()
-        game.set_players((RandomPlayer(game), quarto.MCTSAgent(game, num_rounds=1000, c=10.0)))
-        winner = game.run()
-        if winner == 1: wincount += 1
-        if winner == 0: losecount += 1
+        players = (RandomPlayer(game), quarto.MCTSAgent(game, num_rounds=1000, c=10.0))
+        agent_turn = random.randint(0, 1)
+        as_player_one += agent_turn
+        if agent_turn == 1:
+            game.set_players((players[0], players[1]))
+        else:
+            game.set_players((players[1], players[0]))
+        print(f"Playing game number {g} - Agent is player #{agent_turn} - ", end='')
+        winner = game.run_noprint()
+        if winner == agent_turn: wincount += 1
+        if winner == (1 - agent_turn): losecount += 1
         if winner == -1: drawcount += 1
-        print(f"winner is player number {winner}")
+        print(f"winner is player #{winner}")
     print(f"Against random player:\n- Winrate: {wincount/games*100:.2f}%\n- Drawrate: {drawcount/games*100:.2f}%\n- Loserate: {losecount/games*100:.2f}%")
+    print(f"Agent started as player #1 {as_player_one/games*100:.2f}% of the games, player #0 as {1 - as_player_one/games*100:.2f}%")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -57,5 +65,5 @@ if __name__ == '__main__':
     elif args.verbose == 2:
         logging.getLogger().setLevel(level=logging.DEBUG)
 
-    main()
-    #games_test()
+    #main()
+    games_test()

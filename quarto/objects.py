@@ -199,6 +199,29 @@ class Quarto(object):
         self.print()
         return winner
 
+    # Just a debug thing to run without printing the game state
+    def run_noprint(self) -> int:
+        '''
+        Run the game (with output for every move)
+        '''
+        winner = -1
+        while winner < 0 and not self.check_finished():
+            #self.print()
+            piece_ok = False
+            while not piece_ok:
+                piece_ok = self.select(
+                    self.__players[self._current_player].choose_piece())
+            piece_ok = False
+            self._current_player = (
+                self._current_player + 1) % self.MAX_PLAYERS
+            #self.print()
+            while not piece_ok:
+                x, y = self.__players[self._current_player].place_piece()
+                piece_ok = self.place(x, y)
+            winner = self.check_winner()
+        #self.print()
+        return winner
+
 
 class CustomQuarto(Quarto):
 
@@ -249,6 +272,8 @@ class CustomQuarto(Quarto):
             tmp = copy.deepcopy(self)
             tmp.apply_move(current_move)
             iswin = tmp.check_winner()
+            # It's not needed to specify the target win to achieve, since pieces are 
+            # shared by players, a move that it's winning, it's winning for both
             if iswin >= 0:
                 return current_move
         return None
@@ -336,12 +361,18 @@ class MCTSAgent(Player):
         self._num_rounds = num_rounds
         self._c = c
         self._picked_move = None
+        self._my_turn = 1
 
     def choose_piece(self) -> int:
         # If playing as player 0 I decide the first piece and it will be always piece 0 
         # (no metter on the choice when choosing first piece)
         # If playing as player 1 the field will not be None because after moving I select the next piece
-        ret = copy.deepcopy(self._picked_move._next_piece) if self._picked_move is not None else 0
+        if self._picked_move is not None:
+            ret = copy.deepcopy(self._picked_move._next_piece) 
+        else:
+            self._my_turn = 0
+            # print(f"Agent: I'm player #0")
+            ret = 0
         return ret
 
     def place_piece(self) -> tuple[int, int]:
@@ -352,7 +383,7 @@ class MCTSAgent(Player):
         root = MCTSNode(state)
 
         winning_move = root._game.winning_move()
-        if winning_move is not None: 
+        if winning_move is not None:
             self._picked_move = winning_move
             return
 
@@ -406,7 +437,7 @@ class MCTSAgent(Player):
     # Calculate upper confidence bound fo trees (UCT)
     # This gives you a balance between exploration (breadth) and exploitation (depth)
     def calculate_uct_score(self, parent_roullouts: float, child_rollouts: float, win_pct: float) -> float:
-        exploration = math.sqrt(math.log10(parent_roullouts) / child_rollouts)
+        exploration = math.sqrt(math.log(parent_roullouts) / child_rollouts)
         return win_pct + self._c * exploration
 
     def add_child_for_random_move(self, node: MCTSNode) -> MCTSNode:
@@ -449,6 +480,6 @@ class MCTSAgent(Player):
             lgame = copy.deepcopy(tmp)
             lgame.apply_move(move)
             winner = lgame.check_winner()
-            if winner == 0 or lgame.check_finished():
+            if winner == (1 - self._my_turn) or lgame.check_finished():
                 return True
         return False
